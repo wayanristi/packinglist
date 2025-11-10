@@ -96,12 +96,12 @@
                 <button class="btn btn-secondary" onclick="goBack()">🏠 Home</button>
             </div>
 
-
             <div class="table-responsive">
-                <table class="table table-bordered align-middle text-center" id="dataTable">
+                <table class="table table-hover table-bordered align-middle text-center" id="dataTable">
                     <thead>
                         <tr>
                             <th rowspan="2">Pilih</th>
+                            <th rowspan="2">Line</th>
                             <th rowspan="2">Item</th>
                             <th rowspan="2">Deskripsi Barang</th>
                             <th rowspan="2">Kode Serial Material PLN</th>
@@ -130,14 +130,11 @@
             document.getElementById('loadingOverlay').style.display = 'none';
         }
 
-        // fungsi buat format bulan singkat
         function formatBulanSingkat(value) {
             if (!value) return '-';
             const date = new Date(value);
             if (isNaN(date)) return '-';
-            const bulan = date.toLocaleString('en-US', {
-                month: 'short'
-            });
+            const bulan = date.toLocaleString('en-US', { month: 'short' });
             const tahun = date.getFullYear().toString().slice(-2);
             return `${bulan}-${tahun}`;
         }
@@ -153,83 +150,73 @@
             showLoading();
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {
-                    type: 'array'
-                });
+                const workbook = XLSX.read(data, { type: 'array' });
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(sheet, {
-                    defval: ""
-                });
+                const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
                 const tableBody = document.getElementById('tableBody');
                 tableBody.innerHTML = "";
 
                 jsonData.forEach((row, index) => {
+                    const lines = row["Sales Order Lines"] || "";
                     const item = row["Item"] || "";
-const desc = row["Description"] || "";
-const stdDesc = row["Standard Description"] || "";
-const qty = row["Quantity Lot"] || "";
-const prodOrder = row["Production Order"] || "";
-const lot = row["Lot"] || "";
+                    const desc = row["Description"] || "";
+                    const stdDesc = row["Standard Description"] || "";
+                    const qty = row["Quantity Lot"] || "";
+                    const prodOrder = row["Production Order"] || "";
+                    const lot = row["Lot"] || "";
 
-const tr = document.createElement('tr');
-tr.innerHTML = `
-    <td><input type="checkbox" class="row-check"></td>
-    <td>${item}</td>
-    <td>${desc}</td>
-    
-    <!-- simpan standard description secara tersembunyi -->
-    <td id="kode_${index}" data-std="${stdDesc}">Loading...</td>
-    
-    <td id="qr_${index}">Loading...</td>
-    <td>${qty}</td>
-    <td><input type="month" class="form-control" id="bulan_${index}"></td>
-    <td><input type="number" step="0.01" class="form-control net-input" id="net_${index}" placeholder="Isi Net (Kg)"></td>
-    <td id="gross_${index}"></td>
-`;
-tableBody.appendChild(tr);
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><input type="checkbox" class="row-check"></td>
+                        <td >${lines}</td>
+                        <td >${item}</td>
+                        <td>${desc}</td>
+                        <td id="kode_${index}" data-std="${stdDesc}">Loading...</td>
+                        <td id="qr_${index}">Loading...</td>
+                        <td>${qty}</td>
+                        <td><input type="month" class="form-control" id="bulan_${index}"></td>
+                        <td>
+                            <input type="number" step="0.01" class="form-control net-input" id="net_${index}" placeholder="Isi Net (Kg)">
+                        </td>
+                        <td id="gross_${index}"></td>
+                    `;
+                    tableBody.appendChild(tr);
 
                     const netInput = document.getElementById(`net_${index}`);
-netInput.addEventListener("input", async () => {
+                    netInput.addEventListener("input", async () => {
+                        const netVal = parseFloat(netInput.value) || 0;
+                        const stdDescHidden = document.getElementById(`kode_${index}`).getAttribute("data-std");
 
-    const netVal = parseFloat(netInput.value) || 0;
+                        const angkaStd = stdDescHidden.match(/\d+/);
+                        const angka = angkaStd ? angkaStd[0] : "";
 
-    // Ambil standard description dari hidden attribute (data-std)
-    const stdDescHidden = document.getElementById(`kode_${index}`).getAttribute("data-std");
+                        try {
+                            const response = await fetch(
+                                `<?= site_url('packinglist/get_berat_haspel'); ?>?standard_desc=${angka}`
+                            );
+                            const data = await response.json();
 
-    // Ekstrak angka dari stdDesc (contoh: "HASPEL KAYU 160" -> "160")
-    const angkaStd = stdDescHidden.match(/\d+/);
-    const angka = angkaStd ? angkaStd[0] : "";
+                            const beratHaspel = parseFloat(data.berat_haspel || 0);
+                            const gross = netVal + beratHaspel;
 
-    try {
-        // Panggil controller
-        const response = await fetch(
-            `<?= site_url('packinglist/get_berat_haspel'); ?>?standard_desc=${angka}`
-        );
-        const data = await response.json();
+                            document.getElementById(`gross_${index}`).textContent = gross.toFixed(2);
 
-        const beratHaspel = parseFloat(data.berat_haspel || 0);
-        const gross = netVal + beratHaspel;
+                        } catch (err) {
+                            document.getElementById(`gross_${index}`).textContent = "ERR";
+                        }
+                    });
 
-        document.getElementById(`gross_${index}`).textContent = gross.toFixed(2);
-
-    } catch (err) {
-        document.getElementById(`gross_${index}`).textContent = "ERR";
-    }
-});
-
-
-                    // Ambil kode serial
                     fetch(`<?= site_url('packinglist/get_serial_code'); ?>?desc=${encodeURIComponent(desc)}`)
                         .then(response => response.json())
                         .then(data => {
                             let kodeSerial = data.kode_serial || "-";
                             const prodOrderLast3 = prodOrder.slice(-3);
                             const lotLast4 = lot.slice(-4);
+
                             kodeSerial += `${prodOrderLast3}${lotLast4}`;
-                            // kodeSerial 
 
                             document.getElementById(`kode_${index}`).textContent = kodeSerial;
 
@@ -268,27 +255,28 @@ netInput.addEventListener("input", async () => {
                 if (row.querySelector(".row-check").checked) {
                     const newRow = row.cloneNode(true);
                     newRow.children[0].innerHTML = noUrut;
+                    
+                    if (newRow.children[1]) newRow.removeChild(newRow.children[1]);
 
-                    // Ambil value input bulan produksi & ubah jadi format singkat
+                    if (newRow.children[2]) newRow.removeChild(newRow.children[2]);
+
+
                     const bulanInput = row.querySelector('input[type="month"]');
                     let bulanProduksi = "-";
                     if (bulanInput && bulanInput.value) {
                         const [year, month] = bulanInput.value.split("-");
                         const dateObj = new Date(year, month - 1);
-                        const shortMonth = dateObj.toLocaleString('en-US', {
-                            month: 'short'
-                        });
+                        const shortMonth = dateObj.toLocaleString('en-US', { month: 'short' });
                         bulanProduksi = `${shortMonth}-${year.slice(-2)}`;
                     }
-                    newRow.children[6].textContent = bulanProduksi;
+                    newRow.children[5].textContent = bulanProduksi;
 
-                    // Ambil nilai Net & Gross dari tabel
-                    const qty = parseFloat(newRow.children[5].textContent) || 0;
+                    const qty = parseFloat(newRow.children[4].textContent) || 0;
                     const net = parseFloat(row.querySelector('.net-input')?.value || 0);
-                    const gross = parseFloat(newRow.children[8].textContent) || (net * qty);
+                    const gross = parseFloat(newRow.children[7].textContent) || (net * qty);
 
-                    newRow.children[7].textContent = net.toFixed(2);
-                    newRow.children[8].textContent = gross.toFixed(2);
+                    newRow.children[6].textContent = net.toFixed(2);
+                    newRow.children[7].textContent = gross.toFixed(2);
 
                     totalQty += qty;
                     totalNet += net;
@@ -317,23 +305,6 @@ netInput.addEventListener("input", async () => {
 <head>
 <title>Packing List</title>
 <style>
-@media print {
-  @page {
-    size: A4 portrait;
-    margin: 15mm 10mm 15mm 10mm; /* atas, kanan, bawah, kiri */
-  }
-
-  body {
-    margin: 0;
-    padding: 0;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-}
-
 .container { width: 95%; margin: 0 auto; }
 .kop { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
 .kop img { width: 110px; height: auto; margin-right: 20px; }
@@ -360,19 +331,16 @@ th, td { border: 1px solid #000; padding: 6px 8px; text-align: center; vertical-
 </div>
 </div>
 <div class="line"></div>
-
 <h3>PACKING LIST</h3>
 <table class="header-table">
 <tr><th>Packing List No:</th><td>${packing_no}</td><th>Tanggal UST:</th><td>${tgl_ust}</td></tr>
 <tr><th>Jumlah:</th><td>${jumlah}</td><th>No. Kontrak KHS:</th><td>${kontrak}</td></tr>
 <tr><th>Tanggal:</th><td>${tanggal}</td><th>Nomor Stiker:</th><td>${stiker}</td></tr>
 </table>
-
 <table>
 <thead>
 <tr>
 <th>No</th>
-<th>Item</th>
 <th>Deskripsi Barang</th>
 <th>Kode Serial Material PLN</th>
 <th>QR Barcode</th>
@@ -385,7 +353,7 @@ th, td { border: 1px solid #000; padding: 6px 8px; text-align: center; vertical-
 <tbody>
 ${selectedRows.join("")}
 <tr class="total-row">
-<td colspan="5">TOTAL</td>
+<td colspan="4">TOTAL</td>
 <td>${totalQty.toFixed(2)}</td>
 <td></td>
 <td>${totalNet.toFixed(2)}</td>
@@ -396,9 +364,8 @@ ${selectedRows.join("")}
 </div>
 </body>
 </html>
-`);
+            `);
             printWindow.document.close();
-            // printWindow.print(); // kalau mau langsung print aktifkan ini
         }
 
         function goBack() {
@@ -406,8 +373,7 @@ ${selectedRows.join("")}
         }
     </script>
 
-
-    <!-- Tampilan loading -->
+    <!-- Loading Overlay -->
     <div id="loadingOverlay" style="
     display: none;
     position: fixed;
@@ -420,31 +386,26 @@ ${selectedRows.join("")}
     font-family: Arial, sans-serif;
     color: #333;
 ">
-        <div style="display: inline-block; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
+        <div style="display: inline-block; padding: 20px; background: white; border-radius: 10px; 
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);">
             <div class="spinner" style="
-            width: 40px; height: 40px;
-            border: 4px solid #ccc;
-            border-top-color: #007bff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        "></div>
+                width: 40px; height: 40px;
+                border: 4px solid #ccc;
+                border-top-color: #007bff;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 10px;
+            "></div>
             <div>Memproses data, mohon tunggu...</div>
         </div>
     </div>
 
     <style>
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
-        }
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
     </style>
 
 </body>
-
 </html>
