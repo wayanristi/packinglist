@@ -16,7 +16,7 @@
     <a href="<?= site_url('datahaspel/create') ?>" class="btn btn-success me-2">+ Tambah Data</a>
     <div class="ms-auto">
         <a href="<?= site_url('packinglist') ?>" class="btn btn-secondary me-2">🏠 PL-PLN</a>
-        <a href="<?= site_url('packingliststandar') ?>" class="btn btn-secondary">🏠 PL-NONPLN</a>
+        <a href="<?= site_url('PackingListStandar') ?>" class="btn btn-secondary">🏠 PL-NONPLN</a>
     </div>
 </div>
 

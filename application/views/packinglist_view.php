@@ -119,7 +119,7 @@
                 <input type="file" id="excelFile" accept=".xlsx, .xls" class="form-control mb-2">
                 <button class="btn btn-primary" onclick="importExcel()">📁 Impor</button>
                 <button class="btn btn-success" onclick="printSelected()">🖨️ Cetak</button>
-                <button class="btn btn-secondary" onclick="goBack()">🏠 Home</button>
+                <a href="<?= site_url('') ?>" class="btn btn-secondary me-2">🏠 Home</a>
             </div>
 
             <div class="table-responsive">
