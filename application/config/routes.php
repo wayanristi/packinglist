@@ -52,3 +52,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+$route['kontrak'] = 'kontrak';
+$route['kontrak/add'] = 'kontrak/add';
+$route['kontrak/edit/(:num)'] = 'kontrak/edit/$1';
+$route['kontrak/delete/(:num)'] = 'kontrak/delete/$1';
+

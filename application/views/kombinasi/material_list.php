@@ -3,6 +3,7 @@
 <head>
     <title>Data Material</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-light">
 <div class="container mt-4">
@@ -34,7 +35,7 @@
                 <td><?= $m->tahun ?></td>
                 <td>
                     <a href="<?= site_url('material/edit/'.$m->id) ?>" class="btn btn-warning btn-sm">Edit</a>
-                    <a href="<?= site_url('material/hapus/'.$m->id) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin hapus?')">Hapus</a>
+                    <button class="btn btn-danger btn-sm btn-hapus" data-id="<?= $m->id ?>">Hapus</button>
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -44,8 +45,43 @@
 
 <script>
 function goBack() {
-    window.location.href = "<?= site_url('landing'); ?>";
+    window.location.href = "<?= site_url('packinglist'); ?>";
 }
+
+// Tombol hapus dengan SweetAlert + Ajax
+document.querySelectorAll('.btn-hapus').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const id = this.dataset.id;
+
+        Swal.fire({
+            title: 'Yakin mau hapus?',
+            text: "Data ini akan dihapus permanen?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if(result.isConfirmed) {
+                fetch('<?= site_url("material/hapus/") ?>' + id, {
+                    method: 'POST'
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        Swal.fire('Terhapus!', data.message, 'success')
+                        .then(() => location.reload());
+                    } else {
+                        Swal.fire('Oops...', data.message, 'error');
+                    }
+                })
+                .catch(err => {
+                    Swal.fire('Oops...', 'Terjadi kesalahan server 😢', 'error');
+                    console.error(err);
+                });
+            }
+        });
+    });
+});
 </script>
 
 </body>

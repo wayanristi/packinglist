@@ -54,5 +54,13 @@ public function get_berat_haspel() {
         echo json_encode(['berat_haspel' => 0]);
     }
 }
+public function get_kontrak_khs()
+{
+    $this->load->model('Kontrak_model');
+    $data = $this->Kontrak_model->get_all();
+
+    echo json_encode($data);
+}
+
 
 }

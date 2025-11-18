@@ -8,11 +8,6 @@ class Material extends CI_Controller {
         $this->load->model('Material_model');
     }
 
-    // public function index() {
-    //     $data['material'] = $this->Material_model->get_all();
-    //     $this->load->view('kombinasi/material_form');
-    // }
-
     public function index() {
         $data['materials'] = $this->Material_model->get_all();
         $this->load->view('kombinasi/material_list', $data);
@@ -20,8 +15,13 @@ class Material extends CI_Controller {
 
     public function tambah() {
         if ($this->input->post()) {
-            $this->Material_model->insert($this->input->post());
-            redirect('material');
+            $inserted = $this->Material_model->insert($this->input->post());
+            header('Content-Type: application/json');
+            if($inserted) {
+                echo json_encode(['status'=>'success','message'=>'Data berhasil ditambahkan 🤩']);
+            } else {
+                echo json_encode(['status'=>'error','message'=>'Gagal menyimpan data 😢']);
+            }
         } else {
             $this->load->view('kombinasi/material_form');
         }
@@ -29,8 +29,13 @@ class Material extends CI_Controller {
 
     public function edit($id) {
         if ($this->input->post()) {
-            $this->Material_model->update($id, $this->input->post());
-            redirect('material');
+            $updated = $this->Material_model->update($id, $this->input->post());
+            header('Content-Type: application/json');
+            if($updated) {
+                echo json_encode(['status'=>'success','message'=>'Data berhasil diperbarui 🤩']);
+            } else {
+                echo json_encode(['status'=>'error','message'=>'Gagal memperbarui data 😢']);
+            }
         } else {
             $data['material'] = $this->Material_model->get_by_id($id);
             $this->load->view('kombinasi/material_form', $data);
@@ -38,12 +43,12 @@ class Material extends CI_Controller {
     }
 
     public function hapus($id) {
-        $this->Material_model->delete($id);
-        redirect('material');
-    }
-
-    public function print() {
-        $data['materials'] = $this->Material_model->get_all();
-        $this->load->view('kombinasi/material_print', $data);
+        $deleted = $this->Material_model->delete($id);
+        header('Content-Type: application/json');
+        if($deleted) {
+            echo json_encode(['status'=>'success','message'=>'Data berhasil dihapus 🤩']);
+        } else {
+            echo json_encode(['status'=>'error','message'=>'Gagal menghapus data 😢']);
+        }
     }
 }
