@@ -39,7 +39,7 @@
       <a href="<?= site_url('packinglist'); ?>" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow transition">
         📦 Packing List PLN
       </a>
-      <a href="<?= site_url('packingliststandar'); ?>" class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl shadow transition">
+      <a href="<?= site_url('PackingListStandar'); ?>" class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl shadow transition">
         📦 Packing List Non PLN
       </a>
     </div>
