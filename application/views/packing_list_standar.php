@@ -110,13 +110,16 @@ table td {
 <hr>
 
 <table class="table table-bordered header-table mb-4">
-<tr>
-<th>Type of Cable:</th>
-<td><input type="text" id="type_of_cable"></td>
-<th>Location:</th>
-<td><input type="text" id="location"></td>
-</tr>
+  <tr>
+    <th>Type of Cable:</th>
+    <td><input type="text" id="type_of_cable" class="form-control"></td>
+  </tr>
+  <tr>
+    <th>Location:</th>
+    <td><input type="text" id="location" class="form-control"></td>
+  </tr>
 </table>
+
 
 <div class="no-print mb-3">
 <label for="excelFile" class="form-label fw-bold">Impor Data Excel:</label>
@@ -130,16 +133,20 @@ table td {
 <table class="table table-hover table-bordered align-middle text-center" id="dataTable">
 <thead>
 <tr>
-<th>Pilih</th>
-<th class="line-col">Line</th>
-<th>Type Size</th>
-<th>Drum Number</th>
-<th>Length (M)</th>
-<th>Gross (KG)</th>
-<th>Netto (KG)</th>
-<th>Dimension of Drum (MM*MM*MM = M3)</th>
+  <th>
+    Pilih<br>
+    <input type="checkbox" id="selectAll" onclick="toggleSelectAll()">
+  </th>
+  <th class="line-col">Line</th>
+  <th>Type Size</th>
+  <th>Drum Number</th>
+  <th>Length (M)</th>
+  <th>Gross (KG)</th>
+  <th>Netto (KG)</th>
+  <th>Dimension of Drum (MM*MM*MM = M3)</th>
 </tr>
 </thead>
+
 <tbody id="tableBody"></tbody>
 </table>
 </div>
@@ -438,16 +445,21 @@ th, td { border: 1px solid #000; padding: 6px 8px; text-align:center; vertical-a
 </head>
 <body>
 <div class="date">Date: ${todayStr}</div>
-<h3>PACKING LIST</h3>
+<h3 style="text-decoration: underline;">PACKING LIST</h3>
 <p style="text-align:center; margin-top:-5px; margin-bottom:15px;">${fullNo}</p>
 
 <div class="header-info">
 <table>
-<tr>
-<th>Type of Cable:</th><td>${type_of_cable}</td>
-<th>Location:</th><td>${locationExcel}</td>
-</tr>
+  <tr>
+    <th>Type of Cable:</th>
+    <td>${type_of_cable}</td>
+  </tr>
+  <tr>
+    <th>Location:</th>
+    <td>${locationExcel}</td>
+  </tr>
 </table>
+
 </div>
 
 <table>
@@ -487,6 +499,14 @@ ${selectedRows.join("")}
     printWindow.document.close();
 }
 </script>
+<script>
+function toggleSelectAll() {
+    const allChecks = document.querySelectorAll(".row-check");
+    const isChecked = document.getElementById("selectAll").checked;
 
+    allChecks.forEach(ch => ch.checked = isChecked);
+}
+</script>
 </body>
 </html>
+

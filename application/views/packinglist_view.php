@@ -124,9 +124,13 @@
 
             <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle text-center" id="dataTable">
-                    <thead>
-                        <tr>
-                            <th rowspan="2">Pilih</th>
+    <thead>
+        <tr>
+            <th rowspan="2">
+                <small>Select All</small><br>
+                <input type="checkbox" id="selectAll" onclick="toggleSelectAll()">
+                <br>
+            </th>
                             <th rowspan="2">Line</th>
                             <th rowspan="2">Item</th>
                             <th rowspan="2">Deskripsi Barang</th>
@@ -469,23 +473,6 @@
                                 </div>
                             </div>
                             <div class="line"></div>
-                        </div>
-                    </th>
-                </tr>
-            </thead>
-            <tfoot class="report-footer">
-                <tr>
-                    <td class="report-footer-cell" style="border: none;">
-                        <div class="footer-info">
-                            <p></p>
-                        </div>
-                    </td>
-                </tr>
-            </tfoot>
-            <tbody class="report-content">
-                <tr>
-                    <td class="report-content-cell" style="border: none;">
-                        <div class=" main">
                             <h3>PACKING LIST</h3>
                             <table class="header-table">
                                 <tr>
@@ -507,6 +494,24 @@
                                     <td>${stiker}</td>
                                 </tr>
                             </table>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tfoot class="report-footer">
+                <tr>
+                    <td class="report-footer-cell" style="border: none;">
+                        <div class="footer-info">
+                            <p></p>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+            <tbody class="report-content">
+                <tr>
+                    <td class="report-content-cell" style="border: none;">
+                        <div class=" main">
+                            
                             <table>
                                 <thead>
                                     <tr>
@@ -736,5 +741,14 @@ function update() {
 
 update();
 </script>
+<script>
+function toggleSelectAll() {
+    const master = document.getElementById("selectAll");
+    const checks = document.querySelectorAll(".row-check");
+
+    checks.forEach(ch => ch.checked = master.checked);
+}
+</script>
+
 </body>
 </html>
