@@ -47,6 +47,11 @@
   </div>
 </div>
 
+<!-- Footer Copyright -->
+<!-- Footer Copyright -->
+<div class="relative z-10 text-center w-full py-4 text-white/80 text-sm">
+  © <?= date('Y'); ?> NI WAYAN RISTI ANINGSIH — PT JEMBO CABLE COMPANY Tbk.
+</div>
 
 </body>
 </html>
