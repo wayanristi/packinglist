@@ -9,9 +9,15 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
     <style>
+         @font-face {
+            font-family: 'Myriad Pro Regular';
+            font-style: normal;
+            font-weight: normal;
+            src: local('Myriad Pro Regular'), url('<?= base_url('assets/font/Myriad-Pro-Regular.ttf'); ?>') format('woff');
+        }
         body {
             background: #f4f6f8;
-            font-family: "Segoe UI", sans-serif;
+            font-family: "Myriad Pro Regular", sans-serif;
             margin: 20px;
         }
 
@@ -363,6 +369,9 @@
 <head>
     <title>Packing List</title>
     <style>
+        body {
+                font-family: "Myriad Pro Regular", sans-serif;
+            }
         .container {
             width: 95%;
             margin: 0 auto;
