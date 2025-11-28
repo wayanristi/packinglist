@@ -9,12 +9,13 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
     <style>
-         @font-face {
+        @font-face {
             font-family: 'Myriad Pro Regular';
             font-style: normal;
             font-weight: normal;
             src: local('Myriad Pro Regular'), url('<?= base_url('assets/font/Myriad-Pro-Regular.ttf'); ?>') format('woff');
         }
+
         body {
             background: #f4f6f8;
             font-family: "Myriad Pro Regular", sans-serif;
@@ -73,26 +74,23 @@
         <div class="card p-4">
             <h3>PACKING LIST</h3>
             <div class="d-flex gap-3 mb-4">
+                <a href="<?= site_url('material'); ?>"
+                    class="btn btn-primary shadow-sm"
+                    style="background: linear-gradient(135deg, #5a9bff, #7ebfff); border:none; font-weight:600;">
+                    ⚙️ Data Material
+                </a>
+                <a href="<?= site_url('datahaspel'); ?>"
+                    class="btn btn-info shadow-sm"
+                    style="background: linear-gradient(135deg, #4fc3f7, #81d4fa); border:none; font-weight:600;">
+                    🗃️ Data Haspel
+                </a>
 
-    <a href="<?= site_url('material'); ?>" 
-       class="btn btn-primary shadow-sm"
-       style="background: linear-gradient(135deg, #5a9bff, #7ebfff); border:none; font-weight:600;">
-       ⚙️ Data Material
-    </a>
-
-    <a href="<?= site_url('datahaspel'); ?>"
-       class="btn btn-info shadow-sm"
-       style="background: linear-gradient(135deg, #4fc3f7, #81d4fa); border:none; font-weight:600;">
-       🗃️ Data Haspel
-    </a>
-
-    <a href="<?= site_url('kontrak'); ?>"
-       class="btn btn-success shadow-sm"
-       style="background: linear-gradient(135deg, #66bb6a, #81c784); border:none; font-weight:600;">
-       📑 Data Kontrak KHS
-    </a>
-
-</div>
+                <a href="<?= site_url('kontrak'); ?>"
+                    class="btn btn-success shadow-sm"
+                    style="background: linear-gradient(135deg, #66bb6a, #81c784); border:none; font-weight:600;">
+                    📑 Data Kontrak KHS
+                </a>
+            </div>
 
             <hr>
             <table class="table table-bordered header-table mb-4">
@@ -101,25 +99,22 @@
                     <td><input type="text" id="packing_no"></td>
                     <th>Tanggal UST:</th>
                     <td><input type="date" id="tgl_ust"></td>
-                </tr>
-                <tr>
                     <th>Jumlah:</th>
                     <td><input type="text" id="jumlah"></td>
+                </tr>
+                <tr>
                     <th>No. Kontrak KHS:</th>
                     <td>
                         <select id="kontrak" class="form-control">
                             <option value="">-- Pilih Kontrak KHS --</option>
                         </select>
                     </td>
-                </tr>
-                <tr>
                     <th>Tanggal:</th>
                     <td><input type="date" id="tanggal"></td>
                     <th>Nomor Stiker:</th>
                     <td><input type="text" id="stiker"></td>
                 </tr>
             </table>
-
             <div class="no-print mb-3">
                 <label for="excelFile" class="form-label fw-bold">Impor Data Excel:</label>
                 <input type="file" id="excelFile" accept=".xlsx, .xls" class="form-control mb-2">
@@ -130,19 +125,22 @@
 
             <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle text-center" id="dataTable">
-    <thead>
-        <tr>
-            <th rowspan="2">
-                <small>Select All</small><br>
-                <input type="checkbox" id="selectAll" onclick="toggleSelectAll()">
-                <br>
-            </th>
+                    <thead>
+                        <tr>
+                            <th rowspan="2">
+                                <small>Select All</small><br>
+                                <input type="checkbox" id="selectAll" onclick="toggleSelectAll()">
+                                <br>
+                            </th>
                             <th rowspan="2">Line</th>
                             <th rowspan="2">Item</th>
                             <th rowspan="2">Deskripsi Barang</th>
                             <th rowspan="2">Kode Serial Material PLN</th>
                             <th rowspan="2">QR Barcode</th>
-                            <th rowspan="2">Quantity/Volume (meter)</th>
+                            <th rowspan="2" style="width:50px; white-space:normal; line-height:1.1;">
+                                Quantity<br>Volume<br>(meter)
+                            </th>
+
                             <th rowspan="2">Bulan Produksi</th>
                             <th colspan="2">Berat (Approx)</th>
                         </tr>
@@ -234,7 +232,7 @@
                     const lot = row["Lot"] || "";
                     const itemNet = row["Weight"] || "";
 
-                    const sumnet= Number(itemNet)*Number(qty);
+                    const sumnet = Number(itemNet) * Number(qty);
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
@@ -251,7 +249,7 @@
                     `;
                     tableBody.appendChild(tr);
 
-                                        const stdDescHidden = document.getElementById(`kode_${index}`).getAttribute("data-std");
+                    const stdDescHidden = document.getElementById(`kode_${index}`).getAttribute("data-std");
                     const angkaStd = stdDescHidden.match(/\d+/);
                     const angka = angkaStd ? angkaStd[0] : "";
                     try {
@@ -331,17 +329,18 @@
                     const deskripsi = row.children[3].textContent;
 
                     const trHtml = `
-                    <tr>
-                        <td>${noUrut}</td>
-                        <td style="text-align:left;">${deskripsi}</td>
-                        <td>${kodeSerial}</td>
-                        <td>${qrHtml}</td>
-                        <td>${Math.round(qty)}</td>
-                        <td>${bulanProduksi}</td>
-                        <td>${net}</td>
-                        <td>${gross}</td>
-                    </tr>
-                    `;
+<tr>
+    <td>${noUrut}</td>
+    <td style="text-align:left;">${deskripsi}</td>
+    <td style="text-align:left;">${kodeSerial}</td>
+    <td>${qrHtml}</td>
+    <td style="text-align:right;">${Math.round(qty)}</td>
+    <td>${bulanProduksi}</td>
+    <td style="text-align:right;">${net}</td>
+    <td style="text-align:right;">${gross}</td>
+</tr>
+`;
+
                     selectedRows.push(trHtml);
                     totalQty += qty;
                     totalNet += net;
@@ -463,6 +462,16 @@
             text-align: center;
             vertical-align: middle;
         }
+
+         .footer-weight-cell {
+        width: 46px !important;
+        height: 35px;
+        border-left:1px solid #000;
+        border-right:1px solid #000;
+        border-bottom:1px solid #000;
+        text-align:center;
+        padding:10px;
+    }
     </style>
 </head>
 
@@ -473,76 +482,164 @@
                 <tr>
                     <th class="report-header-cell" style="border: none;">
                         <div class="header-info">
-                            <div class="kop">
-                                <img src="<?= base_url('assets/images/logo_jembo.jpg'); ?>" alt="Logo PT Jembo">
-                                <div class="info">
-                                    <h2>PT JEMBO CABLE COMPANY TBK</h2>
-                                    <p>Jl. Pajajaran, Kel. Gandasari, Kec. Jatiuwung, Kota Tangerang, Banten 15137</p>
-                                    <p>Telp: (021) 65701511 | Email: info@jembo.com</p>
-                                </div>
-                            </div>
-                            <div class="line"></div>
-                            <h3>PACKING LIST</h3>
-                            <table class="header-table">
-                                <tr>
-                                    <th>Packing List No:</th>
-                                    <td>${packing_no}</td>
-                                    <th>Tanggal UST:</th>
-                                    <td>${tgl_ust}</td>
-                                </tr>
-                                <tr>
-                                    <th>Jumlah:</th>
-                                    <td>${jumlah}</td>
-                                    <th>No. Kontrak KHS:</th>
-                                    <td>${kontrak}</td>
-                                </tr>
-                                <tr>
-                                    <th>Tanggal:</th>
-                                    <td>${tanggal}</td>
-                                    <th>Nomor Stiker:</th>
-                                    <td>${stiker}</td>
-                                </tr>
-                            </table>
+                            <div class="kop" style="justify-content:flex-start; margin-bottom:5px;">
+    <img src="<?= base_url('assets/images/logo_jembo.jpg'); ?>" 
+         alt="Logo PT Jembo"
+         style="width:120px; height:auto;">
+</div>
+
+<h3 style="
+    text-align:center; 
+    margin-top:5px; 
+    margin-bottom:10px; 
+    font-size:26px; 
+    font-weight:700;
+    letter-spacing:1px;
+">
+    PACKING LIST
+</h3>
+
+
+<div class="line"></div>
+
+                <table class="header-table" 
+                    style="width:100%; border-collapse:collapse; table-layout:fixed;">
+                    <tr>
+                        <th style="width:16%; background:#f2f2f2; padding:6px; overflow-wrap:break-word; white-space:normal;">
+                            Packing List No:
+                        </th>
+                        <td style="width:17%; padding:6px; overflow-wrap:break-word; white-space:normal;">
+                            ${packing_no}
+                        </td>
+
+                        <th style="width:16%; background:#f2f2f2; padding:6px; overflow-wrap:break-word; white-space:normal;">
+                            Tanggal UST:
+                        </th>
+                        <td style="width:17%; padding:6px; overflow-wrap:break-word; white-space:normal;">
+                            ${tgl_ust}
+                        </td>
+
+                        <th style="width:16%; background:#f2f2f2; padding:6px; overflow-wrap:break-word; white-space:normal;">
+                            Jumlah:
+                        </th>
+                        <td style="width:17%; padding:6px; overflow-wrap:break-word; white-space:normal;">
+                            ${jumlah}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th style="background:#f2f2f2; padding:6px; overflow-wrap:break-word; white-space:normal;">
+                            No. Kontrak KHS:
+                        </th>
+                        <td style="padding:6px; overflow-wrap:break-word; white-space:normal;">
+                            ${kontrak}
+                        </td>
+
+                        <th style="background:#f2f2f2; padding:6px; overflow-wrap:break-word; white-space:normal;">
+                            Tanggal:
+                        </th>
+                        <td style="padding:6px; overflow-wrap:break-word; white-space:normal;">
+                            ${tanggal}
+                        </td>
+
+                        <th style="background:#f2f2f2; padding:6px; overflow-wrap:break-word; white-space:normal;">
+                            Nomor Stiker:
+                        </th>
+                        <td style="padding:6px; overflow-wrap:break-word; white-space:normal;">
+                            ${stiker}
+                        </td>
+                    </tr>
+                </table>
+
                         </div>
                     </th>
                 </tr>
             </thead>
-            <tfoot class="report-footer">
-                <tr>
-                    <td class="report-footer-cell" style="border: none;">
-                        <div class="footer-info">
-                            <p></p>
-                        </div>
-                    </td>
-                </tr>
-            </tfoot>
-            <tbody class="report-content">
+           <tfoot class="report-footer">
+    <tr>
+        <td class="report-footer-cell" style="border:none;">
+            <div class="footer-info">
+                <table style="width:100%; border-collapse:collapse;">
+                    <tr>
+                        <!-- Kolom kosong awal (6 kolom pertama) -->
+                        <td colspan="6" style="border:none;"></td>
+
+                        <!-- Kolom NET (disamakan width dengan header NET) -->
+                        <td class="footer-weight-cell"></td>
+
+                        <!-- Kolom GROSS (disamakan width dengan header GROSS) -->
+                        <td class="footer-weight-cell"></td>
+                    </tr>
+                </table>
+            </div>
+        </td>
+    </tr>
+</tfoot>
+
+   <tbody class="report-content">
                 <tr>
                     <td class="report-content-cell" style="border: none;">
                         <div class=" main">
                             
                             <table>
                                 <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Deskripsi Barang</th>
-                                        <th>Kode Serial Material PLN</th>
-                                        <th>QR Barcode</th>
-                                        <th>Quantity/Volume (meter)</th>
-                                        <th>Bulan Produksi</th>
-                                        <th>Net (Kg)</th>
-                                        <th>Gross (Kg)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+    <tr>
+        <th rowspan="2">No</th>
+        <th rowspan="2">Deskripsi Barang</th>
+        <th rowspan="2">Kode Serial Material PLN</th>
+        <th rowspan="2">QR Barcode</th>
+
+        <th rowspan="2" style="width:55px; white-space:normal; line-height:1.1;">
+            Quantity<br>Volume<br>(meter)
+        </th>
+
+        <th rowspan="2">Bulan Produksi</th>
+
+        <!-- Parent header for Net & Gross -->
+        <th colspan="2" style="text-align:center;">Berat (Approx)</th>
+    </tr>
+
+    <tr>
+        <th "width:55px;>Net (Kg)</th>
+        <th "width:55px;>Gross (Kg)</th>
+    </tr>
+</thead>
+
+                          <tbody>
                                     ${selectedRows.join("")}
-                                    <tr class="total-row">
-    <td colspan="4">TOTAL</td>
-    <td>${Math.round(totalQty)}</td>
-    <td></td>
-    <td>${Math.round(totalNet)}</td>
-    <td>${Math.round(totalGross)}</td>
-</tr>
+                                   <tr class="total-row">
+                                        <td></td>
+                                        <!-- TOTAL DESKRIPSI BARANG -->
+                                        <td style="text-align:middle; font-weight:bold;">
+                                            TOTAL
+                                        </td>
+
+                                        <!-- TOTAL DRUMS (di bawah kolom kode serial material PLN) -->
+                                        <td style="text-align:right; font-weight:bold;">
+                                            ${noUrut - 1} Drums
+                                        </td>
+
+                                        <!-- Kosong (QR Barcode) -->
+                                        <td></td>
+
+                                        <!-- Total Quantity -->
+                                        <td style="text-align:right; font-weight:bold;">
+                                            ${Math.round(totalQty)}
+                                        </td>
+
+                                        <!-- Bulan produksi kosong -->
+                                        <td></td>
+
+                                        <!-- Total Net -->
+                                        <td style="text-align:right; font-weight:bold;">
+                                            ${Math.round(totalNet)}
+                                        </td>
+
+                                        <!-- Total Gross -->
+                                        <td style="text-align:right; font-weight:bold;">
+                                            ${Math.round(totalGross)}
+                                        </td>
+                                    </tr>
 
                                 </tbody>
                             </table>
@@ -679,85 +776,99 @@
         }
     </style>
     <!-- Pagination -->
-<nav>
-    <ul class="pagination justify-content-center" id="pagination"></ul>
-</nav>
+    <nav>
+        <ul class="pagination justify-content-center" id="pagination"></ul>
+    </nav>
 
-<script>
-const rowsPerPage = 10;
-let currentPage = 1;
+    <script>
+        const rowsPerPage = 10;
+        let currentPage = 1;
 
-function displayPage(rows) {
-    const start = (currentPage - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    rows.forEach((row, index) => row.style.display = (index >= start && index < end) ? '' : 'none');
-}
-
-function displayPagination() {
-    const rows = Array.from(document.querySelectorAll('#tableBody tr'));
-    const totalPages = Math.ceil(rows.length / rowsPerPage);
-    const pagination = document.getElementById('pagination');
-    pagination.innerHTML = '';
-
-    if(totalPages <= 1) return;
-
-    // Previous
-    const prev = document.createElement('li');
-    prev.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
-    prev.innerHTML = `<a class="page-link" href="#">Previous</a>`;
-    prev.onclick = e => {
-        e.preventDefault();
-        if(currentPage>1) { currentPage--; update(); }
-    };
-    pagination.appendChild(prev);
-
-    // Generate page numbers with dots
-    let pages = [];
-    if (currentPage <= 3) {
-        pages = [1,2,3,'...', totalPages-1, totalPages];
-    } else if (currentPage >= totalPages-2) {
-        pages = [1,2,'...', totalPages-2,totalPages-1,totalPages];
-    } else {
-        pages = [1,2,'...', currentPage,'...', totalPages-1,totalPages];
-    }
-
-    pages.forEach(p => {
-        const li = document.createElement('li');
-        if(p==='...') {
-            li.className = 'page-item disabled';
-            li.innerHTML = `<a class="page-link" href="#">...</a>`;
-        } else {
-            li.className = 'page-item' + (p===currentPage ? ' active' : '');
-            li.innerHTML = `<a class="page-link" href="#">${p}</a>`;
-            li.onclick = e => { e.preventDefault(); currentPage = p; update(); };
+        function displayPage(rows) {
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            rows.forEach((row, index) => row.style.display = (index >= start && index < end) ? '' : 'none');
         }
-        pagination.appendChild(li);
-    });
 
-    // Next
-    const next = document.createElement('li');
-    next.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
-    next.innerHTML = `<a class="page-link" href="#">Next</a>`;
-    next.onclick = e => { e.preventDefault(); if(currentPage<totalPages){ currentPage++; update(); } };
-    pagination.appendChild(next);
+        function displayPagination() {
+            const rows = Array.from(document.querySelectorAll('#tableBody tr'));
+            const totalPages = Math.ceil(rows.length / rowsPerPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
 
-    displayPage(rows);
-}
+            if (totalPages <= 1) return;
 
-function update() {
-    displayPagination();
-}
+            // Previous
+            const prev = document.createElement('li');
+            prev.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+            prev.innerHTML = `<a class="page-link" href="#">Previous</a>`;
+            prev.onclick = e => {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    update();
+                }
+            };
+            pagination.appendChild(prev);
 
-update();
-</script>
-<script>
-function toggleSelectAll() {
-    const master = document.getElementById("selectAll");
-    const checks = document.querySelectorAll(".row-check");
+            // Generate page numbers with dots
+            let pages = [];
+            if (currentPage <= 3) {
+                pages = [1, 2, 3, '...', totalPages - 1, totalPages];
+            } else if (currentPage >= totalPages - 2) {
+                pages = [1, 2, '...', totalPages - 2, totalPages - 1, totalPages];
+            } else {
+                pages = [1, 2, '...', currentPage, '...', totalPages - 1, totalPages];
+            }
 
-    checks.forEach(ch => ch.checked = master.checked);
-}
-</script>
+            pages.forEach(p => {
+                const li = document.createElement('li');
+                if (p === '...') {
+                    li.className = 'page-item disabled';
+                    li.innerHTML = `<a class="page-link" href="#">...</a>`;
+                } else {
+                    li.className = 'page-item' + (p === currentPage ? ' active' : '');
+                    li.innerHTML = `<a class="page-link" href="#">${p}</a>`;
+                    li.onclick = e => {
+                        e.preventDefault();
+                        currentPage = p;
+                        update();
+                    };
+                }
+                pagination.appendChild(li);
+            });
+
+            // Next
+            const next = document.createElement('li');
+            next.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
+            next.innerHTML = `<a class="page-link" href="#">Next</a>`;
+            next.onclick = e => {
+                e.preventDefault();
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    update();
+                }
+            };
+            pagination.appendChild(next);
+
+            displayPage(rows);
+        }
+
+        function update() {
+            displayPagination();
+        }
+
+        update();
+    </script>
+    <script>
+        function toggleSelectAll() {
+            const master = document.getElementById("selectAll");
+            const checks = document.querySelectorAll(".row-check");
+
+            checks.forEach(ch => ch.checked = master.checked);
+        }
+    </script>
 
 </body>
+
 </html>

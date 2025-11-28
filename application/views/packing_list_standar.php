@@ -12,7 +12,7 @@
             font-family: 'Myriad Pro Regular';
             font-style: normal;
             font-weight: normal;
-            src: local('Myriad Pro Regular'), url('<?= base_url('assets/font/Myriad-Pro-Regular.ttf'); ?>') format('woff');
+            src: local('Myriad Pro Regular'), url('<?= base_url(' assets/font/Myriad-Pro-Regular.ttf'); ?>') format('woff');
         }
 
         body {
@@ -138,8 +138,7 @@
         <div class="card p-4">
             <h3>PACKING LIST</h3>
             <div class="d-flex gap-3 mb-4">
-                <a href="<?= site_url('datahaspel'); ?>"
-                    class="btn btn-info shadow-sm"
+                <a href="<?= site_url('datahaspel'); ?>" class="btn btn-info shadow-sm"
                     style="background: linear-gradient(135deg, #4fc3f7, #81d4fa); border:none; font-weight:600;">
                     🗃️ Data Haspel
                 </a>
@@ -179,8 +178,9 @@
                             <th>Type Size</th>
                             <th>Drum Number</th>
                             <th>Length (M)</th>
-                            <th>Gross (KG)</th>
-                            <th>Netto (KG)</th>
+                            <th>Berat</th>
+                            <th  rowspan="2" style="width:50px;"> Gross (KG)</th>
+                            <th  rowspan="2" style="width:50px;"> Netto (KG)</th>
                             <th>Dimension of Drum (MM*MM*MM = M3)</th>
                         </tr>
                     </thead>
@@ -247,6 +247,8 @@
 
                 jsonData.forEach((row, i) => {
                     const desc = row["Description"] || "";
+                    const weight = parseFloat(row["Weight"]) || 0;
+                    const weightDisplay = weight * 1000;
                     if (!desc.trim()) return;
                     const match = desc.match(/^([A-Za-z\/\s\.\-\dV]+?)(?=\s+\d|$)/);
                     const prefix = match ? match[1].trim() : desc.trim();
@@ -277,7 +279,6 @@
 
                     const lineData = row["Sales Order Lines"] || "";
                     const quantityLot = parseFloat(row["Quantity Lot"]) || 0;
-                    const weight = parseFloat(row["Weight"]) || 0;
                     const netto = quantityLot * weight;
                     const gross = beratHaspel > 0 ? netto + beratHaspel : netto;
                     grossDisplay = keteranganBerat ? keteranganBerat : Math.round(gross);
@@ -288,6 +289,7 @@
                         detail: detail || "-",
                         drumNumber: drumNumber,
                         lengthM: Math.round(quantityLot),
+                        berat: weightDisplay,
                         gross: grossDisplay,
                         netto: Math.round(netto),
                         dimension: dimensiDisplay
@@ -321,8 +323,9 @@
                 <td style="text-align:left;">${item.detail}</td>
                 <td>${item.drumNumber}</td>
                 <td>${item.lengthM}</td>
-                <td>${item.gross}</td>
-                <td>${item.netto}</td>
+                <td>${item.berat}</td>
+                <td>${item.gross} </td> 
+                <td>${item.netto} </td> 
                 <td>${item.dimension}</td>`;
                         tableBody.appendChild(tr);
                         lastLine = item.line;
@@ -424,183 +427,230 @@
 
         // PRINT FUNCTION
         function printSelected() {
-            const allRows = document.querySelectorAll("#tableBody tr");
-            const selectedRows = [];
-            let noUrut = 1;
-            let totalGross = 0;
-            let totalNetto = 0;
-            let totalLength = 0;
-            let totalM3 = 0;
-            let totalDrums = 0;
-            let currentPrefix = "";
-            let lastPrefix = null;
-            let lastLine = null;
+    const allRows = document.querySelectorAll("#tableBody tr");
+    const selectedRows = [];
 
-            allRows.forEach(row => {
-                const prefixCell = row.querySelector("td[style*='font-weight:bold']");
-                if (prefixCell) currentPrefix = prefixCell.textContent.trim();
+    let noUrut = 1;
+    let totalGross = 0;
+    let totalNetto = 0;
+    let totalLength = 0;
+    let totalM3 = 0;
+    let totalDrums = 0;
 
-                const check = row.querySelector(".row-check");
-                if (check && check.checked) {
-                    const tds = row.querySelectorAll("td");
-                    totalDrums++;
+    let currentPrefix = "";
+    let lastPrefix = null;
+    let lastLine = null;
 
-                    const grossText = tds[5].textContent.trim();
-                    const grossVal = parseFloat(grossText) || 0;
-                    const nettoVal = parseFloat(tds[6].textContent) || 0;
-                    const lengthVal = parseFloat(tds[4].textContent) || 0;
-                    let m3Val = 0;
-                    const dimText = tds[7].textContent.trim();
-                    const match = dimText.match(/=\s*([\d,.]+)/);
-                    if (match) {
-                        m3Val = parseFloat(match[1].replace(/,/g, '')) || 0;
-                    }
+    allRows.forEach(row => {
 
-                    if (!grossText.includes("Data haspel")) totalGross += Math.round(grossVal);
-                    totalNetto += Math.round(nettoVal);
-                    totalLength += Math.round(lengthVal);
-                    totalM3 += m3Val;
+        const prefixCell = row.querySelector("td[style*='font-weight:bold']");
+        if (prefixCell) currentPrefix = prefixCell.textContent.trim();
 
-                    if (lastLine !== null && tds[1].textContent.trim() !== lastLine) {
-                        selectedRows.push(`<tr><td colspan="8" style="height:8px; background:#f8f9fa;"></td></tr>`);
-                    }
-                    if (currentPrefix !== lastPrefix) {
-                        selectedRows.push(`<tr><td></td><td style="text-align:left; font-weight:bold;">${currentPrefix}</td><td colspan="5"></td></tr>`);
-                        lastPrefix = currentPrefix;
-                    }
-                    selectedRows.push(`<tr>
-                <td>${noUrut}</td>
-                <td style="text-align:left;">${tds[2].textContent}</td>
-                <td>${tds[3].textContent}</td>
-                <td>${tds[4].textContent}</td>
-                <td>${tds[5].textContent}</td>
-                <td>${tds[6].textContent}</td>
-                <td>${tds[7].textContent}</td>
-            </tr>`);
-                    noUrut++;
-                    lastLine = tds[1].textContent.trim();
-                }
-            });
+        const check = row.querySelector(".row-check");
+        if (check && check.checked) {
 
-            if (selectedRows.length === 0) {
-                alert("Pilih minimal satu data untuk dicetak!");
-                return;
+            const tds = row.querySelectorAll("td");
+            totalDrums++;
+
+            const lengthVal = parseFloat(tds[4].textContent.trim().replace(/,/g, '')) || 0;
+
+            const grossText = tds[6].textContent.trim();
+            const grossVal = parseFloat(grossText.replace(/,/g, '')) || 0;
+
+            const nettoText = tds[7].textContent.trim();
+            const nettoVal = parseFloat(nettoText.replace(/,/g, '')) || 0;
+
+            let m3Val = 0;
+            const dimText = tds[8].textContent.trim();
+            const match = dimText.match(/=\s*([\d,.]+)/);
+            if (match) {
+                m3Val = parseFloat(match[1].replace(/,/g, '')) || 0;
             }
 
-            const today = new Date();
-            const type_of_cable = document.getElementById('type_of_cable').value || '-';
-            const manualNo = prompt("Masukkan nomor SOP:", "") || "----";
-            const year = today.getFullYear();
-            const fullNo = `No. ${manualNo}/PP/${salesOrderNo}/${year}/P`;
+            if (!grossText.includes("Data haspel")) {
+                totalGross += Math.round(grossVal);
+            }
 
-            const options = {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            };
-            const todayStr = today.toLocaleDateString('en-GB', options).replace(/ /g, '-');
+            totalNetto += Math.round(nettoVal);
+            totalLength += Math.round(lengthVal);
+            totalM3 += m3Val;
 
-            const printWindow = window.open('', '', 'width=1000,height=800');
-            printWindow.document.write(`
-<html>
-<head>
-<title>Packing List</title>
-<style>
- body {
-            background: #f4f6f8;
-            font-family: "Myriad Pro Regular", sans-serif;
-            margin: 20px;
+            if (lastLine !== null && tds[1].textContent.trim() !== lastLine) {
+                selectedRows.push(`
+                    <tr><td style="height:8px; background:#f8f9fa;"></td>
+                    <td></td><td></td><td></td><td></td><td></td></tr>
+                `);
+            }
+
+            if (currentPrefix !== lastPrefix) {
+                selectedRows.push(`
+                    <tr>
+                        <td></td>
+                        <td style="text-align:center; font-weight:bold; padding:4px 6px;">
+                            ${currentPrefix}
+                        </td>
+                        <td></td><td></td><td></td><td></td><td></td>
+                    </tr>
+                `);
+                lastPrefix = currentPrefix;
+            }
+
+            selectedRows.push(`
+                <tr>
+                    <td style="text-align:center;">${noUrut}</td>
+                    <td style="text-align:center;">${tds[2].textContent}</td>
+                    <td style="text-align:center;">${tds[3].textContent}</td>
+
+                    <!-- LENGTH -->
+                    <td class="col-length">${tds[4].textContent}</td>
+
+                    <!-- GROSS -->
+                    <td class="col-gross">${tds[6].textContent}</td>
+
+                    <!-- NETTO -->
+                    <td class="col-netto">${tds[7].textContent}</td>
+
+                    <td style="text-align:center;">${tds[8].textContent}</td>
+                </tr>
+            `);
+
+            noUrut++;
+            lastLine = tds[1].textContent.trim();
         }
-h3 { text-align: center; font-size:18px; font-weight:bold; margin-bottom:5px; }
-.header-info { width:100%; margin-bottom:10px; }
-.header-info table { width:100%; border-collapse:collapse; }
-.header-info th, .header-info td { text-align:left; padding:4px 6px; font-size:13px; }
-.date { text-align:right; font-size:12px; margin-bottom:5px; }
-table { width:100%; border-collapse: collapse; font-size:13px; margin-top:5px; }
-th, td { border: 1px solid #000; padding: 6px 8px; text-align:center; vertical-align:middle; }
-.total-row td { font-weight:bold; }
-.signature { margin-top:40px; width:200px; text-align:center; float:right; }
-.signature .name { margin-bottom:60px; }
+    });
 
-/* --------- AREA CETAK HALAMAN FIX --------- */
-@media print {
-
-    @page {
-        size: A4;
-        margin-top: 15mm;      /* ruang untuk header + nomor halaman */
-        margin-bottom: 20mm;
-
-        @top-right {
-            content: "Page " counter(page) " / " counter(pages);
-            font-size: 12px;
-            color: #555;
-        }
+    if (selectedRows.length === 0) {
+        alert("Pilih minimal satu data untuk dicetak!");
+        return;
     }
 
-    body {
-        margin: 0;
-        padding: 0;
-    }
+    const today = new Date();
+    const type_of_cable = document.getElementById('type_of_cable').value || '-';
+    const manualNo = prompt("Masukkan nomor SOP:", "") || "----";
+    const year = today.getFullYear();
+    const fullNo = `No. ${manualNo}/PP/${salesOrderNo}/${year}/P`;
+
+    const options = { day: '2-digit', month: 'short', year: 'numeric' };
+    const todayStr = today.toLocaleDateString('en-GB', options).replace(/ /g, '-');
+
+    const printWindow = window.open('', '', 'width=1000,height=800');
+
+    printWindow.document.write(`
+<html><head>
+    <title>Packing List</title>
+    <style>
+.empty-separator td {
+    border: none !important;
+    background: white !important;
+    height: 5px !important;
+    padding: 0 !important;
 }
 
-</style>
+        /* === FIX PAGE NUMBER HILANG === */
+       @page {
+        size: A4 portrait;
+        margin: 15mm;
+
+        @top-right {
+            content: "Page " counter(page) " of " counter(pages);
+            font-size: 12px;
+            font-weight: bold;
+        }
+    }
+
+    @media print {
+        body { counter-reset: page; }
+    }
+
+            }
+        }
+
+        body { background:#f4f6f8; font-family:"Myriad Pro Regular"; margin:20px; }
+        h3 { text-align:center; font-size:18px; font-weight:bold; margin-bottom:5px; }
+        .date { text-align:right; font-size:12px; margin-bottom:5px; }
+
+        table { border:1px solid #000; width:100%; border-collapse:collapse; margin-top:5px; }
+        table thead th { padding:6px 10px; text-align:center; border:1px solid #000; }
+        table td { border-left:1px solid #000; border-right:1px solid #000; font-size:13px; padding:6px 10px; }
+
+        /* === KOLOM NUMERIC RAPIH === */
+        .col-length, .col-gross, .col-netto {
+            text-align: right !important;
+            padding: 6px 12px !important;
+            white-space: nowrap;
+            min-width: 70px;
+        }
+
+        .header-info { display:inline-grid; grid-template-columns:150px 10px auto; gap:4px 8px; margin-bottom:10px; }
+
+        .total-row td { font-weight:bold; }
+        .signature { margin-top:40px; width:200px; float:right; text-align:center; }
+        .signature .name { margin-bottom:60px; }
+    </style>
 </head>
+
 <body>
-<div class="date">Date: ${todayStr}</div>
-<h3 style="text-decoration: underline;">PACKING LIST</h3>
-<p style="text-align:center; margin-top:-5px; margin-bottom:15px;">${fullNo}</p>
+    <div class="date">Date: ${todayStr}</div>
+    <h3 style="text-decoration:underline;">PACKING LIST</h3>
+    <p style="text-align:center; margin-top:-5px; margin-bottom:15px;">${fullNo}</p>
 
-<div class="header-info">
-<table>
-  <tr>
-    <th>Type of Cable:</th>
-    <td>${type_of_cable}</td>
-  </tr>
-  <tr>
-    <th>Location:</th>
-    <td>${locationExcel}</td>
-  </tr>
-</table>
+    <div class="header-info">
+        <div class="label">Type of Cable</div><div class="colon">:</div><div class="value">${type_of_cable}</div>
+        <div class="label">Location</div><div class="colon">:</div><div class="value">${locationExcel}</div>
+    </div>
 
-</div>
+    <table>
+        <thead>
+            <tr>
+                <th rowspan="2">No</th>
+                <th rowspan="2">Type & Size</th>
+                <th rowspan="2">Drum Number</th>
+                <th rowspan="2">Length (M)</th>
+                <th colspan="2">Weight (Kg)</th>
+                <th rowspan="2">Dimension of Drum<br>(MM x MM x MM = M3)</th>
+            </tr>
+            <tr>
+                <th>Gross</th>
+                <th>Netto</th>
+            </tr>
+        </thead>
 
-<table>
-<thead>
-<tr>
-<th>No</th>
-<th>Type Size</th>
-<th>Drum Number</th>
-<th>Length (M)</th>
-<th>Gross (KG)</th>
-<th>Netto (KG)</th>
-<th>Dimension of Drum</th>
-</tr>
-</thead>
-<tbody>
-${selectedRows.join("")}
-<tr class="total-row">
-<td colspan="2">TOTAL</td>
-<td>${totalDrums} Drums</td>
-<td>${totalLength}</td>
-<td>${totalGross}</td>
-<td>${totalNetto}</td>
-<td>${totalM3.toFixed(1)}</td>
-</tr>
-</tbody>
-</table>
+        <tbody>
+            ${selectedRows.join("")}
 
-<div class="signature">
-<div>PREPARED BY</div>
-<div class="name"></div>
-<div>PRODUCTION PLANNING CONTROL</div>
-</div>
+            <tr class="total-row">
+                <td style="border-top:1px solid #000;"></td>
+                <td style="border-top:1px solid #000; text-align:center;">TOTAL</td>
+                <td style="border-top:1px solid #000; text-align:center;">${totalDrums} Drums</td>
+                <td style="border-top:1px solid #000;"></td>
+                <td style="border-top:1px solid #000;"></td>
+                <td style="border-top:1px solid #000;"></td>
+                <td style="border-top:1px solid #000;"></td>
+            </tr>
 
-</body>
-</html>
+            <tr>
+                <td></td><td></td><td></td>
+                <td class="col-length">${totalLength}</td>
+                <td class="col-gross">${totalGross}</td>
+                <td class="col-netto">${totalNetto}</td>
+                <td style="text-align:center;">${totalM3.toFixed(1)} M³</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="signature">
+        <div>PREPARED BY</div>
+        <div class="name"></div>
+        <div>PRODUCTION PLANNING CONTROL</div>
+    </div>
+
+</body></html>
     `);
 
-            printWindow.document.close();
-        }
+    printWindow.document.close();
+}
+
+        
     </script>
     <script>
         function toggleSelectAll() {
