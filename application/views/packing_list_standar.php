@@ -250,9 +250,20 @@
                     const weight = parseFloat(row["Weight"]) || 0;
                     const weightDisplay = weight * 1000;
                     if (!desc.trim()) return;
-                    const match = desc.match(/^([A-Za-z\/\s\.\-\dV]+?)(?=\s+\d|$)/);
-                    const prefix = match ? match[1].trim() : desc.trim();
-                    const detail = desc.replace(prefix, "").trim();
+                    // Pisahkan prefix & detail dengan mencari angka pertama
+const match = desc.match(/^(.+?)\s+(\d.*)$/);
+
+let prefix, detail;
+
+if (match) {
+    prefix = match[1].trim(); 
+    detail = match[2].trim();  
+} else {
+    // fallback: kalau format sangat beda
+    prefix = desc.trim();
+    detail = "-";
+}
+
 
                     const stdDesc = row["Standard Description"] || "";
                     const numMatch = stdDesc.match(/\b(\d{2,3})\b/);
