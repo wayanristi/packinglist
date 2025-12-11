@@ -24,7 +24,7 @@
         <form method="post" id="formHaspel" action="<?= isset($data) ? site_url('datahaspel/update/'.$data->id) : site_url('datahaspel/store') ?>">
             <div class="mb-3">
                 <label class="form-label">Haspel</label>
-                <input type="number" name="haspel" class="form-control" value="<?= isset($data) ? $data->haspel : '' ?>" required>
+                <input type="text" name="haspel" class="form-control" value="<?= isset($data) ? $data->haspel : '' ?>" required>
             </div>
 
             <div class="mb-3">

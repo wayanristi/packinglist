@@ -9,6 +9,13 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
     <style>
+
+        .qr-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
         @font-face {
             font-family: 'Myriad Pro Regular';
             font-style: normal;
@@ -100,7 +107,7 @@
                     <th>Tanggal UST:</th>
                     <td><input type="date" id="tgl_ust"></td>
                     <th>Jumlah:</th>
-                    <td><input type="text" id="jumlah"></td>
+                  <td><input type="text" id="jumlah" readonly></td>
                 </tr>
                 <tr>
                     <th>No. Kontrak KHS:</th>
@@ -122,6 +129,7 @@
                 <button class="btn btn-success" onclick="printSelected()">🖨️ Cetak</button>
                 <a href="<?= site_url('') ?>" class="btn btn-secondary me-2">🏠 Home</a>
             </div>
+
 
             <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle text-center" id="dataTable">
@@ -241,13 +249,16 @@
                         <td>${item}</td>
                         <td>${desc}</td>
                         <td id="kode_${index}" data-std="${stdDesc}">Loading...</td>
-                        <td id="qr_${index}">Loading...</td>
+                        <td id="qr_${index}" class="qr-cell">Loading...</td>
                         <td>${qty}</td>
                         <td><input type="month" class="form-control" id="bulan_${index}"></td>
                         <td class="net-input">${sumnet}</td>
                         <td id="gross_${index}"></td>
                     `;
                     tableBody.appendChild(tr);
+                    // update jumlah otomatis setiap row dicentang
+tr.querySelector(".row-check").addEventListener("change", handleRowCheck);
+
 
                     const stdDescHidden = document.getElementById(`kode_${index}`).getAttribute("data-std");
                     const angkaStd = stdDescHidden.match(/\d+/);
@@ -333,7 +344,11 @@
     <td>${noUrut}</td>
     <td style="text-align:left;">${deskripsi}</td>
     <td style="text-align:left;">${kodeSerial}</td>
-    <td>${qrHtml}</td>
+    <td style="text-align:center; vertical-align:middle;">
+    <div style="display:flex; justify-content:center; align-items:center;">
+        ${qrHtml}
+    </div>
+</td>
     <td style="text-align:right;">${Math.round(qty)}</td>
     <td>${bulanProduksi}</td>
     <td style="text-align:right;">${net}</td>
@@ -422,7 +437,6 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
-            margin-top: 10px;
         }
 
 
@@ -463,15 +477,6 @@
             vertical-align: middle;
         }
 
-         .footer-weight-cell {
-        width: 46px !important;
-        height: 35px;
-        border-left:1px solid #000;
-        border-right:1px solid #000;
-        border-bottom:1px solid #000;
-        text-align:center;
-        padding:10px;
-    }
     </style>
 </head>
 
@@ -561,14 +566,10 @@
             <div class="footer-info">
                 <table style="width:100%; border-collapse:collapse;">
                     <tr>
-                        <!-- Kolom kosong awal (6 kolom pertama) -->
-                        <td colspan="6" style="border:none;"></td>
+                       <td colspan="6" style="border:none;"></td>
+<td class="footer-weight-cell" style="width:55px; height:30px"></td>
+<td class="footer-weight-cell" style="width:55px; height:30px"></td>
 
-                        <!-- Kolom NET (disamakan width dengan header NET) -->
-                        <td class="footer-weight-cell"></td>
-
-                        <!-- Kolom GROSS (disamakan width dengan header GROSS) -->
-                        <td class="footer-weight-cell"></td>
                     </tr>
                 </table>
             </div>
@@ -584,7 +585,7 @@
                             <table>
                                 <thead>
     <tr>
-        <th rowspan="2">No</th>
+        <th rowspan="2">No Item</th>
         <th rowspan="2">Deskripsi Barang</th>
         <th rowspan="2">Kode Serial Material PLN</th>
         <th rowspan="2">QR Barcode</th>
@@ -600,8 +601,8 @@
     </tr>
 
     <tr>
-        <th "width:55px;>Net (Kg)</th>
-        <th "width:55px;>Gross (Kg)</th>
+        <th style="width:55px;">Net (Kg)</th>
+        <th style="width:55px;">Gross (Kg)</th>
     </tr>
 </thead>
 
@@ -736,6 +737,7 @@
             displayPagination();
         }
     </script>
+    
 
     <!-- Loading Overlay -->
     <div id="loadingOverlay" style="
@@ -867,6 +869,74 @@
 
             checks.forEach(ch => ch.checked = master.checked);
         }
+        function toggleSelectAll() {
+    const master = document.getElementById("selectAll");
+    const checks = document.querySelectorAll(".row-check");
+
+    checks.forEach(ch => ch.checked = master.checked);
+
+    updateHeaderJumlah(); // ini penting biar total Jumlah ikut berubah
+}
+
+
+        function updateHeaderJumlah() {
+    const allRows = document.querySelectorAll("#tableBody tr");
+    let totalQty = 0;
+    let totalDrum = 0;
+
+    allRows.forEach(row => {
+        if (row.querySelector(".row-check").checked) {
+            const qty = parseFloat(row.children[6].textContent) || 0;
+            totalQty += qty;
+            totalDrum += 1; // setiap row yang dicentang = 1 drum
+        }
+    });
+
+    document.getElementById('jumlah').value = `${Math.round(totalQty)} m / ${totalDrum} Drums`;
+}
+
+// --- AUTO ISI BULAN PRODUKSI --- //
+function fillBulanProduksiForChecked() {
+    const allRows = document.querySelectorAll("#tableBody tr");
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const currentValue = `${year}-${month}`;
+
+    allRows.forEach((row) => {
+        const checkbox = row.querySelector(".row-check");
+        const bulanInput = row.querySelector('input[type="month"]');
+
+        if (checkbox.checked) {
+            bulanInput.value = currentValue;  // Auto set
+        }
+    });
+}
+
+// --- SELECT ALL --- //
+function toggleSelectAll() {
+    const checkAll = document.getElementById("selectAll");
+    const rows = document.querySelectorAll(".row-check");
+
+    rows.forEach(ch => ch.checked = checkAll.checked);
+
+    // Setelah centang → isi bulan otomatis
+    fillBulanProduksiForChecked();
+
+    // Update jumlah di header (punya kamu)
+    updateHeaderJumlah();
+}
+
+// --- KETIKA USER CENTANG SATU-SATU --- //
+function handleRowCheck() {
+    // Kalau user centang manual → isi bulan otomatis hanya baris itu
+    fillBulanProduksiForChecked();
+
+    // Update jumlah (punya kamu)
+    updateHeaderJumlah();
+}
+
+
     </script>
 
 </body>

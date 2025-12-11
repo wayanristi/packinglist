@@ -12,7 +12,7 @@
             font-family: 'Myriad Pro Regular';
             font-style: normal;
             font-weight: normal;
-            src: local('Myriad Pro Regular'), url('<?= base_url(' assets/font/Myriad-Pro-Regular.ttf'); ?>') format('woff');
+            src: local('Myriad Pro Regular'), url('<?= base_url('assets/font/Myriad-Pro-Regular.ttf'); ?>') format('woff');
         }
 
         body {
@@ -164,6 +164,7 @@
                 <button class="btn btn-primary" onclick="importExcel()">📁 Impor</button>
                 <button class="btn btn-success" onclick="printSelected()">🖨️ Cetak</button>
                 <a href="<?= site_url('') ?>" class="btn btn-secondary me-2">🏠 Home</a>
+
             </div>
 
             <div class="table-responsive">
@@ -179,8 +180,8 @@
                             <th>Drum Number</th>
                             <th>Length (M)</th>
                             <th>Berat</th>
-                            <th  rowspan="2" style="width:50px;"> Gross (KG)</th>
-                            <th  rowspan="2" style="width:50px;"> Netto (KG)</th>
+                            <th rowspan="2" style="width:50px;"> Gross (KG)</th>
+                            <th rowspan="2" style="width:50px;"> Netto (KG)</th>
                             <th>Dimension of Drum (MM*MM*MM = M3)</th>
                         </tr>
                     </thead>
@@ -251,42 +252,84 @@
                     const weightDisplay = weight * 1000;
                     if (!desc.trim()) return;
                     // Pisahkan prefix & detail dengan mencari angka pertama
-const match = desc.match(/^(.+?)\s+(\d.*)$/);
+                    const match = desc.match(/^(.+?)\s+(\d.*)$/);
 
-let prefix, detail;
+                    let prefix, detail;
 
-if (match) {
-    prefix = match[1].trim(); 
-    detail = match[2].trim();  
+                    if (match) {
+                        prefix = match[1].trim();
+                        detail = match[2].trim();
+                    } else {
+                        // fallback: kalau format sangat beda
+                        prefix = desc.trim();
+                        detail = "-";
+                    }
+
+
+               const stdDescRaw = row["Standard Description"] || "";
+
+// Ambil baris pertama yang ada teksnya
+const firstLine = String(stdDescRaw).split(/\r?\n/).find(line => line.trim() !== "") || "";
+
+// Ambil excelKey
+let excelKey = firstLine.trim();
+
+// 1️⃣ Cek exact match dulu (untuk kasus '140 SL' atau format khusus)
+let haspelNumber = "";
+if (beratHaspelData[excelKey]) {
+    haspelNumber = excelKey;
 } else {
-    // fallback: kalau format sangat beda
-    prefix = desc.trim();
-    detail = "-";
+    let numMatch = excelKey.match(/\b\d{1,3}\b/);
+    if (numMatch) {
+        excelKey = numMatch[0];
+
+        // 2️⃣ Kalau angka kurang dari 3 digit, coba padStart ke 3 digit
+        let padded = excelKey.padStart(3, '0');
+        if (beratHaspelData[padded]) {
+            haspelNumber = padded;
+        } else {
+            // 3️⃣ Cari di data haspel yang mengandung angka sama (contoh: 103 → HASPEL KAYU 103 EXPORT)
+            for (const key in beratHaspelData) {
+                if (key.includes(excelKey)) {
+                    haspelNumber = key;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+// Lot
+const lotVal = row["Lot"] ? String(row["Lot"]).trim() : "";
+
+// Drum (tampilan sesuai aturan)
+// - angka murni → buang leading zero
+// - ada huruf (SL/SS) → tampil apa adanya
+const drumNumber = haspelNumber ?
+    `${/^\d+$/.test(haspelNumber) ? parseInt(haspelNumber, 10) : haspelNumber}${lotVal ? " - " + lotVal : ""}` :
+    lotVal;
+
+// Inisialisasi
+let beratHaspel = 0;
+let grossDisplay = "";
+let keteranganBerat = "";
+let dimensiDisplay = "-";
+
+// Ambil data haspel jika ada
+if (haspelNumber && beratHaspelData[haspelNumber]) {
+    const dataH = beratHaspelData[haspelNumber];
+    beratHaspel = parseFloat(dataH.berat || 0);
+    const p = parseFloat(dataH.panjang) || 0;
+    const l = parseFloat(dataH.lebar) || 0;
+    const t = parseFloat(dataH.tinggi) || 0;
+    const m3 = parseFloat(dataH.m3) || 0;
+    dimensiDisplay = `${p} × ${l} × ${t} = ${m3.toFixed(1)}`;
+} else {
+    keteranganBerat = "Data haspel belum ada";
+    dimensiDisplay = "Data belum ada";
 }
 
 
-                    const stdDesc = row["Standard Description"] || "";
-                    const numMatch = stdDesc.match(/\b(\d{2,3})\b/);
-                    const drumNumber = numMatch ? `${numMatch[1]} - ${row["Lot"] || ""}` : row["Lot"] || "";
-                    const haspelNumber = numMatch ? numMatch[1] : null;
-
-                    let beratHaspel = 0;
-                    let grossDisplay = "";
-                    let keteranganBerat = "";
-                    let dimensiDisplay = "-";
-
-                    if (haspelNumber && beratHaspelData[haspelNumber]) {
-                        const dataH = beratHaspelData[haspelNumber];
-                        beratHaspel = parseFloat(dataH.berat || 0);
-                        const p = parseFloat(dataH.panjang) || 0;
-                        const l = parseFloat(dataH.lebar) || 0;
-                        const t = parseFloat(dataH.tinggi) || 0;
-                        const m3 = parseFloat(dataH.m3) || 0;
-                        dimensiDisplay = `${p} × ${l} × ${t} = ${m3.toFixed(1)}`;
-                    } else {
-                        keteranganBerat = "Data haspel belum ada";
-                        dimensiDisplay = "Data belum ada";
-                    }
 
                     const lineData = row["Sales Order Lines"] || "";
                     const quantityLot = parseFloat(row["Quantity Lot"]) || 0;
@@ -438,63 +481,63 @@ if (match) {
 
         // PRINT FUNCTION
         function printSelected() {
-    const allRows = document.querySelectorAll("#tableBody tr");
-    const selectedRows = [];
+            const allRows = document.querySelectorAll("#tableBody tr");
+            const selectedRows = [];
 
-    let noUrut = 1;
-    let totalGross = 0;
-    let totalNetto = 0;
-    let totalLength = 0;
-    let totalM3 = 0;
-    let totalDrums = 0;
+            let noUrut = 1;
+            let totalGross = 0;
+            let totalNetto = 0;
+            let totalLength = 0;
+            let totalM3 = 0;
+            let totalDrums = 0;
 
-    let currentPrefix = "";
-    let lastPrefix = null;
-    let lastLine = null;
+            let currentPrefix = "";
+            let lastPrefix = null;
+            let lastLine = null;
 
-    allRows.forEach(row => {
+            allRows.forEach(row => {
 
-        const prefixCell = row.querySelector("td[style*='font-weight:bold']");
-        if (prefixCell) currentPrefix = prefixCell.textContent.trim();
+                const prefixCell = row.querySelector("td[style*='font-weight:bold']");
+                if (prefixCell) currentPrefix = prefixCell.textContent.trim();
 
-        const check = row.querySelector(".row-check");
-        if (check && check.checked) {
+                const check = row.querySelector(".row-check");
+                if (check && check.checked) {
 
-            const tds = row.querySelectorAll("td");
-            totalDrums++;
+                    const tds = row.querySelectorAll("td");
+                    totalDrums++;
 
-            const lengthVal = parseFloat(tds[4].textContent.trim().replace(/,/g, '')) || 0;
+                    const lengthVal = parseFloat(tds[4].textContent.trim().replace(/,/g, '')) || 0;
 
-            const grossText = tds[6].textContent.trim();
-            const grossVal = parseFloat(grossText.replace(/,/g, '')) || 0;
+                    const grossText = tds[6].textContent.trim();
+                    const grossVal = parseFloat(grossText.replace(/,/g, '')) || 0;
 
-            const nettoText = tds[7].textContent.trim();
-            const nettoVal = parseFloat(nettoText.replace(/,/g, '')) || 0;
+                    const nettoText = tds[7].textContent.trim();
+                    const nettoVal = parseFloat(nettoText.replace(/,/g, '')) || 0;
 
-            let m3Val = 0;
-            const dimText = tds[8].textContent.trim();
-            const match = dimText.match(/=\s*([\d,.]+)/);
-            if (match) {
-                m3Val = parseFloat(match[1].replace(/,/g, '')) || 0;
-            }
+                    let m3Val = 0;
+                    const dimText = tds[8].textContent.trim();
+                    const match = dimText.match(/=\s*([\d,.]+)/);
+                    if (match) {
+                        m3Val = parseFloat(match[1].replace(/,/g, '')) || 0;
+                    }
 
-            if (!grossText.includes("Data haspel")) {
-                totalGross += Math.round(grossVal);
-            }
+                    if (!grossText.includes("Data haspel")) {
+                        totalGross += Math.round(grossVal);
+                    }
 
-            totalNetto += Math.round(nettoVal);
-            totalLength += Math.round(lengthVal);
-            totalM3 += m3Val;
+                    totalNetto += Math.round(nettoVal);
+                    totalLength += Math.round(lengthVal);
+                    totalM3 += m3Val;
 
-            if (lastLine !== null && tds[1].textContent.trim() !== lastLine) {
-                selectedRows.push(`
+                    if (lastLine !== null && tds[1].textContent.trim() !== lastLine) {
+                        selectedRows.push(`
                     <tr><td style="height:8px; background:#f8f9fa;"></td>
                     <td></td><td></td><td></td><td></td><td></td></tr>
                 `);
-            }
+                    }
 
-            if (currentPrefix !== lastPrefix) {
-                selectedRows.push(`
+                    if (currentPrefix !== lastPrefix) {
+                        selectedRows.push(`
                     <tr>
                         <td></td>
                         <td style="text-align:center; font-weight:bold; padding:4px 6px;">
@@ -503,10 +546,10 @@ if (match) {
                         <td></td><td></td><td></td><td></td><td></td>
                     </tr>
                 `);
-                lastPrefix = currentPrefix;
-            }
+                        lastPrefix = currentPrefix;
+                    }
 
-            selectedRows.push(`
+                    selectedRows.push(`
                 <tr>
                     <td style="text-align:center;">${noUrut}</td>
                     <td style="text-align:center;">${tds[2].textContent}</td>
@@ -525,31 +568,36 @@ if (match) {
                 </tr>
             `);
 
-            noUrut++;
-            lastLine = tds[1].textContent.trim();
-        }
-    });
+                    noUrut++;
+                    lastLine = tds[1].textContent.trim();
+                }
+            });
 
-    if (selectedRows.length === 0) {
-        alert("Pilih minimal satu data untuk dicetak!");
-        return;
-    }
+            if (selectedRows.length === 0) {
+                alert("Pilih minimal satu data untuk dicetak!");
+                return;
+            }
 
-    const today = new Date();
-    const type_of_cable = document.getElementById('type_of_cable').value || '-';
-    const manualNo = prompt("Masukkan nomor SOP:", "") || "----";
-    const year = today.getFullYear();
-    const fullNo = `No. ${manualNo}/PP/${salesOrderNo}/${year}/P`;
+            const today = new Date();
+            const type_of_cable = document.getElementById('type_of_cable').value || '-';
+            const manualNo = prompt("Masukkan nomor SOP:", "") || "----";
+            const year = today.getFullYear();
+            const fullNo = `No. ${manualNo}/PP/${salesOrderNo}/${year}/P`;
 
-    const options = { day: '2-digit', month: 'short', year: 'numeric' };
-    const todayStr = today.toLocaleDateString('en-GB', options).replace(/ /g, '-');
+            const options = {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            };
+            const todayStr = today.toLocaleDateString('en-GB', options).replace(/ /g, '-');
 
-    const printWindow = window.open('', '', 'width=1000,height=800');
+            const printWindow = window.open('', '', 'width=1000,height=800');
 
-    printWindow.document.write(`
+            printWindow.document.write(`
 <html><head>
     <title>Packing List</title>
     <style>
+   
 .empty-separator td {
     border: none !important;
     background: white !important;
@@ -568,9 +616,27 @@ if (match) {
             font-weight: bold;
         }
     }
-
+    
     @media print {
         body { counter-reset: page; }
+        
+    }
+
+   @media print {
+    body::after {
+        content: "";
+        position: fixed;
+        bottom: 1%;
+        left: 1%;
+        width: 98%;
+        border-bottom: 1px solid #000;
+        height: 0;
+        margin: 0;
+
+    }
+}
+
+        }
     }
 
             }
@@ -658,10 +724,8 @@ if (match) {
 </body></html>
     `);
 
-    printWindow.document.close();
-}
-
-        
+            printWindow.document.close();
+        }
     </script>
     <script>
         function toggleSelectAll() {
@@ -670,7 +734,8 @@ if (match) {
 
             allChecks.forEach(ch => ch.checked = isChecked);
         }
-    </script>
+    </script> 
+
 </body>
 
 </html>

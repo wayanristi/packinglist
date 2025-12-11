@@ -79,25 +79,27 @@ class PackingListStandar extends CI_Controller {
     }
 
     // ✅ Ambil semua data berat dari tabel data_haspel
-    public function get_berat_haspel_all()
-    {
-        $this->db->select('haspel, berat, panjang, lebar, tinggi, m3');
-        $query = $this->db->get('data_haspel')->result();
+public function get_berat_haspel_all()
+{
+    $this->db->select('haspel, berat, panjang, lebar, tinggi, m3');
+    $query = $this->db->get('data_haspel')->result();
 
-        $hasil = [];
-        foreach ($query as $row) {
-            // cari angka di nama haspel (misal "Drum 101" → ambil "101")
-            if (preg_match('/\b(\d+)\b/', $row->haspel, $m)) {
-                $hasil[$m[1]] = [
-                    'berat'   => $row->berat,
-                    'panjang' => $row->panjang,
-                    'lebar'   => $row->lebar,
-                    'tinggi'  => $row->tinggi,
-                    'm3'      => $row->m3
-                ];
-            }
-        }
+    $hasil = [];
 
-        echo json_encode($hasil);
+    foreach ($query as $row) {
+        // Simpan key haspel UTUH (tanpa filter angka)
+        $key = trim($row->haspel);
+
+        $hasil[$key] = [
+            'berat'   => $row->berat,
+            'panjang' => $row->panjang,
+            'lebar'   => $row->lebar,
+            'tinggi'  => $row->tinggi,
+            'm3'      => $row->m3
+        ];
     }
+
+    echo json_encode($hasil);
+}
+
 }
