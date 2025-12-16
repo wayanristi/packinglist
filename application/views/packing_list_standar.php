@@ -12,7 +12,7 @@
             font-family: 'Myriad Pro Regular';
             font-style: normal;
             font-weight: normal;
-            src: local('Myriad Pro Regular'), url('<?= base_url('assets/font/Myriad-Pro-Regular.ttf'); ?>') format('woff');
+            src: local('Myriad Pro Regular'),url('<?= base_url('assets/font/Myriad-Pro-Regular.ttf'); ?>') format('woff');
         }
 
         body {

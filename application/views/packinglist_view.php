@@ -170,6 +170,20 @@
     </div>
 
     <script>
+        function formatTanggalIndonesia(tgl) {
+    if (!tgl) return '-';
+    const months = [
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+    const d = new Date(tgl);
+    if (isNaN(d)) return '-';
+    const day = d.getDate();
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+}
+
         // ✅ Load data kontrak dari database ke dropdown
         window.onload = function() {
             fetch("<?= site_url('packinglist/get_kontrak_khs'); ?>")
@@ -370,10 +384,10 @@ tr.querySelector(".row-check").addEventListener("change", handleRowCheck);
             }
 
             const packing_no = document.getElementById('packing_no').value || '-';
-            const tgl_ust = document.getElementById('tgl_ust').value || '-';
+            const tgl_ust = formatTanggalIndonesia(document.getElementById('tgl_ust').value);
             const jumlah = document.getElementById('jumlah').value || '-';
             const kontrak = document.getElementById('kontrak').value || '-';
-            const tanggal = document.getElementById('tanggal').value || '-';
+            const tanggal = formatTanggalIndonesia(document.getElementById('tanggal').value);
             const stiker = document.getElementById('stiker').value || '-';
 
             const printWindow = window.open('', '', 'width=1000,height=800');
