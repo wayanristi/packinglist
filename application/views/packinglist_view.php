@@ -582,18 +582,22 @@ tr.querySelector(".row-check").addEventListener("change", handleRowCheck);
                     <tr>
                        <td colspan="6" style="border:none;"></td>
 <td class="footer-weight-cell" style="
-    width:70px;
-    height:35px;
+    width:55px;
+    height:30px;
     text-align:center;
     vertical-align:middle;
 ">
     <img src="<?= base_url('assets/images/ttd.png'); ?>"
-         style="max-width:100%; max-height:40px;">
+         style="
+            max-width:100%;
+            max-height:100%;
+            object-fit:contain;
+         ">
 </td>
 
 <td class="footer-weight-cell" style="
-    width:70px;
-    height:35px;
+    width:55px;
+    height:30px;
 ">
 </td>
 
