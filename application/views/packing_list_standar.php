@@ -8,18 +8,17 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        @font-face {
-            font-family: 'Myriad Pro Regular';
-            font-style: normal;
-            font-weight: normal;
-            src: local('Myriad Pro Regular'),url('<?= base_url('assets/font/Myriad-Pro-Regular.ttf'); ?>') format('woff');
-        }
+       @font-face {
+    font-family: 'MyriadPro';
+    font-style: normal;
+    font-weight: normal;
+    src: url('<?= base_url("assets/font/Myriad-Pro-Regular.ttf"); ?>') format('truetype');
+}
 
-        body {
-            background: #f4f6f8;
-            font-family: "Myriad Pro Regular", sans-serif;
-            margin: 20px;
-        }
+
+      body{
+    font-family: 'MyriadPro', sans-serif;
+}
 
         .card {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -597,6 +596,24 @@ if (haspelNumber && beratHaspelData[haspelNumber]) {
 <html><head>
     <title>Packing List</title>
     <style>
+@font-face {
+    font-family: 'MyriadPro';
+    src: url('<?= base_url("assets/font/Myriad-Pro-Regular.ttf"); ?>') format('truetype');
+}
+
+body{
+    font-family: 'MyriadPro', sans-serif;
+}
+
+/* print override */
+@media print {
+    * {
+        font-family: 'MyriadPro' !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
    
 .empty-separator td {
     border: none !important;
