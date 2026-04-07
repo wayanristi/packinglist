@@ -56,4 +56,8 @@ $route['kontrak'] = 'kontrak';
 $route['kontrak/add'] = 'kontrak/add';
 $route['kontrak/edit/(:num)'] = 'kontrak/edit/$1';
 $route['kontrak/delete/(:num)'] = 'kontrak/delete/$1';
+$route['spk'] = 'spk/index';
+$route['spk/test_relasi/(:num)'] = 'spk/test_relasi/$1';
+
+
 

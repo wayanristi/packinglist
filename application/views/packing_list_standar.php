@@ -613,7 +613,7 @@ body{
         print-color-adjust: exact;
     }
 }
-
+ 
    
 .empty-separator td {
     border: none !important;

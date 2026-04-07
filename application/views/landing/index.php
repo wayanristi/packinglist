@@ -42,6 +42,9 @@
       <a href="<?= site_url('PackingListStandar'); ?>" class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl shadow transition">
         📦 Packing List Non PLN
       </a>
+      <a href="<?= site_url('spk'); ?>" class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl shadow transition">
+        📄 Surat Perintah Kerja
+      </a>
     </div>
 
   </div>
